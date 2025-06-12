@@ -33,7 +33,8 @@ onMounted(() => {
 		);
 		// Define a shared text type on the document
 		const ytext = ydoc.getText('quill');
-		const binding = new QuillBinding(ytext, quill, provider.awareness);
+		// const binding = new QuillBinding(ytext, quill, provider.awareness);
+		new QuillBinding(ytext, quill, provider.awareness);
 		const persistence = new IndexeddbPersistence('quill-demo-room', ydoc);
 		persistence.once('synced', (e: any) => {
 			console.log('synced with IndexedDB', e);
