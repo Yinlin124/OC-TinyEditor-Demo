@@ -46,10 +46,10 @@ onMounted(() => {
 
 		new QuillBinding(ytext, quill, awareness);
 
-		awareness.on('change', (changes: Yjs.Transaction) => {
-			// 获取所有协同信息 用户列表
+		// 修改类型声明
+		awareness.on('change', (changes: any) => {
 			const allUsers = Array.from(awareness.getStates().values()).map(
-				item => item.user
+				(item: any) => item.user
 			);
 			console.log('changes', changes, allUsers);
 		});
