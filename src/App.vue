@@ -16,33 +16,51 @@ Quill.register('modules/cursors', QuillCursors);
 
 const editorRef = ref<HTMLDivElement | null>(null);
 
+const ydoc = new Y.Doc();
+const provider = new WebsocketProvider(
+	'wss://demos.yjs.dev/ws',
+	'OC-demo-YL',
+	ydoc
+);
 onMounted(() => {
 	let quill: TinyEditor | null = null;
 	if (editorRef.value) {
 		quill = new TinyEditor(editorRef.value, {
 			theme: 'snow',
+			modules: {
+				cursors: true,
+			},
 		});
 	}
 	if (quill) {
-		const ydoc = new Y.Doc();
-		// connect to the public demo server (not in production!)
-		const provider = new WebsocketProvider(
-			'wss://demos.yjs.dev/ws',
-			'quill-demo-room',
-			ydoc
-		);
-		// Define a shared text type on the document
 		const ytext = ydoc.getText('quill');
-		// const binding = new QuillBinding(ytext, quill, provider.awareness);
-		new QuillBinding(ytext, quill, provider.awareness);
-		const persistence = new IndexeddbPersistence('quill-demo-room', ydoc);
+		const awareness = provider.awareness;
+
+		// 设置本地用户信息
+		let color =
+			'#' + Math.random().toString(16).split('.')[1].slice(0, 6);
+		awareness.setLocalStateField('user', {
+			name: 'User_' + Math.random().toString(36).substr(2, 8),
+			color,
+		});
+
+		new QuillBinding(ytext, quill, awareness);
+
+		awareness.on('change', (changes: Yjs.Transaction) => {
+			// 获取所有协同信息 用户列表
+			const allUsers = Array.from(awareness.getStates().values()).map(
+				item => item.user
+			);
+			console.log('changes', changes, allUsers);
+		});
+
+		const persistence = new IndexeddbPersistence('OC-demo-YL', ydoc);
 		persistence.once('synced', (e: any) => {
 			console.log('synced with IndexedDB', e);
-			// Load initial content from IndexedDB
 			console.log('initial content loaded');
 		});
 	}
 });
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="less" scoped></style>
